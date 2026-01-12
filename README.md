@@ -55,12 +55,21 @@ Perfect for repetitive tasks like feeding, buffing, or running server-side comma
 
 ```json
 {
-  "enabled": true,
   "intervalSeconds": 200,
   "hudOpacity": 100,
+  "showHud": true,
+  "hudScale": 1.0,
+  "alignment": "TOP_LEFT",
+  "enabled": true,
   "commands": [
-    { "command": "feed", "intervalSeconds": 200, "lastRun": 0 },
-    { "command": "heal", "intervalSeconds": 300, "lastRun": 0 }
+    {
+      "command": "feed",
+      "intervalSeconds": 200
+    },
+    {
+      "command": "heal",
+      "intervalSeconds": 300
+    }
   ]
 }
 ````
