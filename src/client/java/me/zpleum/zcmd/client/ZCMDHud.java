@@ -98,6 +98,6 @@ public class ZCMDHud {
         matrices.popMatrix();
 
         int licenseY = screenHeight - mc.textRenderer.fontHeight - 5;
-        context.drawText(mc.textRenderer, Text.literal("§8Under " + ModMetadataUtil.license() + " License."), 5, licenseY, applyOpacity(0xFFFFFFFF, 40), true);
+        context.drawText(mc.textRenderer, Text.literal("§8" + ModMetadataUtil.modName() + "§8Under " + ModMetadataUtil.license() + " License."), 5, licenseY, applyOpacity(0xFFFFFFFF, 40), true);
     }
 }
