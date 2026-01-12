@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "zcmd",
+  "version": "${version}",
+
+  "name": "zCMD",
+  "description": "Automatically runs multiple commands with individual timers. \nFully configurable via GUI, supports HUD countdown, keybind toggle, and persistent settings.\n",
+  "authors": [
+    {
+      "name": "zPleum"
+    }
+  ],
+  "icon": "assets/zcmd/icon.png",
+  "contact": {
+    "homepage": "https://www.zpleum.site/",
+    "sources": "https://github.zpleum.site/",
+    "facebook": "https://facebook.zpleum.site/",
+    "discord": "https://discord.zpleum.site/"
+  },
+
+  "license": "MIT",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": ["me.zpleum.zcmd.client.ZcmdClient"]
+  },
+
+  "mixins": [
+    "zcmd.mixins.json"
+  ,{
+      "config": "zcmd.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
