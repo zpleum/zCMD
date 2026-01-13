@@ -22,6 +22,10 @@ public class ModMetadataUtil {
         return m != null ? m.getName() : "Unknown Mod";
     }
 
+    public static String modId() {
+        return metadata().getId();
+    }
+
     public static String authors() {
         ModMetadata m = metadata();
         if (m == null) return "Unknown";

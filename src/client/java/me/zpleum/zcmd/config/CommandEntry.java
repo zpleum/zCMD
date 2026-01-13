@@ -9,10 +9,11 @@ public class CommandEntry {
 
     public CommandEntry(String command, long intervalSeconds) {
         this.command = command;
-        this.intervalSeconds = intervalSeconds;
+        this.intervalSeconds = Math.max(1, intervalSeconds);
     }
 
     public long intervalTicks() {
-        return intervalSeconds * 20L;
+        long sec = Math.max(1, intervalSeconds);
+        return sec * 20L;
     }
 }

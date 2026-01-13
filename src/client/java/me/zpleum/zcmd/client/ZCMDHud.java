@@ -35,27 +35,24 @@ public class ZCMDHud {
         var cfg = ZcmdClient.CONFIG;
         int color = applyOpacity(BASE_COLOR, cfg.hudOpacity);
 
+        long currentTick = mc.world.getTime();
+
         List<Text> lines = new ArrayList<>();
-        lines.add(Text.literal("§8( §6⚡ zCMD §8) ").append(Text.literal(cfg.enabled ? "§aON" : "§cOFF")));
+        lines.add(Text.literal("§8( §6§l⚡ §r§6zCMD §8) ").append(Text.literal(cfg.enabled ? "§aEnabled" : "§cDisabled")));
 
         if (!cfg.enabled) {
-            lines.add(Text.literal("§7Paused"));
+            lines.add(Text.literal("§8• §7Paused"));
+        } else if (cfg.commands.isEmpty()) {
+            lines.add(Text.literal("§8• §7No commands set"));
         } else {
-            if (cfg.commands.isEmpty()) {
-                lines.add(Text.literal("§8> §7No commands set"));
-            } else {
-                long currentTick = mc.world.getTime();
-                for (CommandEntry entry : cfg.commands) {
-                    long remainingMs = Math.max(0, entry.nextRunTick - currentTick) * 50L;
-                    lines.add(Text.literal(" §8• §7/§f" + entry.command + " §8→ §e" + TimeUtil.format(remainingMs)));
-                }
+            for (CommandEntry entry : cfg.commands) {
+                long remainingTick = Math.max(0, entry.nextRunTick - currentTick);
+                long remainingMs = remainingTick * 50L;
+
+                lines.add(Text.literal("§8• §f/" + entry.command)
+                        .append(Text.literal(" §8→ §e" + TimeUtil.format(remainingMs))));
             }
         }
-
-        lines.add(Text.literal(""));
-
-        String authors = String.join(", ", ModMetadataUtil.authors());
-        lines.add(Text.literal("§7" + ModMetadataUtil.modName() + " v" + ModMetadataUtil.version() + " §7by " + authors));
 
         int screenWidth = context.getScaledWindowWidth();
         int screenHeight = context.getScaledWindowHeight();
@@ -75,9 +72,13 @@ public class ZCMDHud {
             startX = PADDING;
         }
 
-        if (cfg.alignment == HudAlignment.BOTTOM_LEFT || cfg.alignment == HudAlignment.BOTTOM_RIGHT) {
+        if (cfg.alignment == HudAlignment.BOTTOM_LEFT) {
             startY = screenHeight - (lines.size() * lineHeight) - PADDING - 15;
-        } else {
+        }
+        else if (cfg.alignment == HudAlignment.BOTTOM_RIGHT) {
+            startY = screenHeight - (lines.size() * lineHeight) - PADDING;
+        }
+        else {
             startY = PADDING;
         }
 
@@ -97,7 +98,8 @@ public class ZCMDHud {
 
         matrices.popMatrix();
 
-        int licenseY = screenHeight - mc.textRenderer.fontHeight - 5;
-        context.drawText(mc.textRenderer, Text.literal("§8" + ModMetadataUtil.modName() + " §8Under " + ModMetadataUtil.license() + " License."), 5, licenseY, applyOpacity(0xFFFFFFFF, 40), true);
+        int authorsY = screenHeight - mc.textRenderer.fontHeight - 5;
+        String authors = String.join(", ", ModMetadataUtil.authors());
+        context.drawText(mc.textRenderer, Text.literal("§8" + ModMetadataUtil.modName() + " v" + ModMetadataUtil.version() + " §8by " + authors), 5, authorsY, applyOpacity(0xFFFFFFFF, 40), true);
     }
 }

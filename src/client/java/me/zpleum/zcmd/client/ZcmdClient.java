@@ -20,6 +20,7 @@ public class ZcmdClient implements ClientModInitializer {
     private static KeyBinding toggleKey;
     private static KeyBinding openGuiKey;
 
+    // runtime queue only
     private static final PriorityQueue<CommandEntry> queue =
             new PriorityQueue<>(Comparator.comparingLong(e -> e.nextRunTick));
 
@@ -61,14 +62,14 @@ public class ZcmdClient implements ClientModInitializer {
                 }
 
                 client.player.sendMessage(
-                        Text.literal("§8( §6⚡ zCMD §8) ")
+                        Text.literal("§8( §6§l⚡ §r§6zCMD §8) ")
                                 .append(Text.literal(CONFIG.enabled ? "§aEnabled" : "§cDisabled")),
                         false
                 );
             }
 
             if (!CONFIG.enabled) {
-                if (!queue.isEmpty()) queue.clear();
+                queue.clear();
                 return;
             }
 
@@ -89,6 +90,7 @@ public class ZcmdClient implements ClientModInitializer {
                     client.player.networkHandler.sendChatCommand(cmd);
                 }
 
+                // reset schedule ใหม่ทุกครั้ง
                 entry.nextRunTick = tick + entry.intervalTicks();
                 queue.add(entry);
             }
@@ -97,9 +99,12 @@ public class ZcmdClient implements ClientModInitializer {
 
     public static void rebuildQueue(long nowTick) {
         queue.clear();
+
         for (CommandEntry entry : CONFIG.commands) {
             if (entry == null || entry.command == null || entry.command.isBlank()) continue;
-            entry.nextRunTick = nowTick + entry.intervalTicks();
+
+            long interval = entry.intervalTicks();
+            entry.nextRunTick = nowTick + interval;
             queue.add(entry);
         }
     }

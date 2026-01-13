@@ -3,11 +3,14 @@ package me.zpleum.zcmd.client;
 import me.zpleum.zcmd.config.CommandEntry;
 import me.zpleum.zcmd.config.ZCMDConfig.HudAlignment;
 import me.zpleum.zcmd.config.ZCMDConfig;
+import me.zpleum.zcmd.util.ModMetadataUtil;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,7 +112,11 @@ public class ZCMDConfigScreen extends Screen {
     }
 
     private void initCommandTab(int centerX) {
-        int y = 60;
+        int y = 100;
+
+        addSectionTitle(centerX, y - 20 , "§8( §6§l Commands §8)");
+        y += 18;
+
         for (CommandEntry entry : tempCommands) {
             addDrawableChild(ButtonWidget.builder(Text.literal("§f/" + entry.command + " §e" + entry.intervalSeconds + "s"),
                     btn -> { editingEntry = entry; init(); }).dimensions(centerX - 100, y, 175, 20).build());
@@ -139,22 +146,51 @@ public class ZCMDConfigScreen extends Screen {
     }
 
     private void initAppearanceTab(int centerX) {
-        int y = 65;
-        addDrawableChild(ButtonWidget.builder(Text.literal("HUD Display: " + (config.showHud ? "§aON" : "§cOFF")),
-                btn -> { config.showHud = !config.showHud; init(); }).dimensions(centerX - 100, y, 200, 20).build());
+        int y = 100;
 
-        y += 25;
-        addDrawableChild(ButtonWidget.builder(Text.literal("Position: §e" + config.alignment.name()),
+        // ===== HUD DISPLAY =====
+        addSectionTitle(centerX, y, "§8( §6§lHUD Display §8)");
+        y += 32; // title → content
+
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal("HUD: " + (config.showHud ? "§aEnabled" : "§cDisabled")),
+                btn -> { config.showHud = !config.showHud; init(); }
+        ).dimensions(centerX - 100, y, 200, 20).build());
+
+        y += 16; // item → item
+
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal("Position: §e" + config.alignment.name()),
                 btn -> {
                     int next = (config.alignment.ordinal() + 1) % HudAlignment.values().length;
                     config.alignment = HudAlignment.values()[next];
                     init();
-                }).dimensions(centerX - 100, y, 200, 20).build());
+                }
+        ).dimensions(centerX - 100, y, 200, 20).build());
 
-        y += 25;
-        addValueControl(centerX - 100, y, "Opacity", config.hudOpacity, 10, 100, (val) -> config.hudOpacity = val);
-        y += 25;
-        addValueControl(centerX - 100, y, "Scale", (int)(config.hudScale * 100), 10, 200, (val) -> config.hudScale = val / 100f);
+        // ===== HUD STYLE =====
+        y += 40; // group separation
+
+        addSectionTitle(centerX, y, "§8( §6§lHUD Style §8)");
+        y += 32;
+
+        addValueControl(centerX - 100, y, "Opacity",
+                config.hudOpacity, 10, 100,
+                (val) -> config.hudOpacity = val);
+
+        y += 16;
+
+        addValueControl(centerX - 100, y, "Scale",
+                (int)(config.hudScale * 100),
+                10, 200,
+                (val) -> config.hudScale = val / 100f);
+    }
+
+    private void addSectionTitle(int centerX, int y, String title) {
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal("§6§l" + title),
+                btn -> {}
+        ).dimensions(centerX - 120, y, 240, 24).build());
     }
 
     private void addValueControl(int x, int y, String label, int current, int min, int max, java.util.function.Consumer<Integer> setter) {
@@ -167,6 +203,40 @@ public class ZCMDConfigScreen extends Screen {
     }
 
     private void initAboutTab(int centerX) {
+        int y = 100;
+
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal("§8( §6§l⚡ zCMD §8)"),
+                btn -> {}
+        ).dimensions(centerX - 120, y, 240, 24).build());
+
+        y += 35;
+
+        addInfoCard(centerX, y, "Version", ModMetadataUtil.version());
+        y += 24;
+
+        addInfoCard(centerX, y, "Author(s)", String.join(", ", ModMetadataUtil.authors()));
+        y += 24;
+
+        addInfoCard(centerX, y, "Mod ID", ModMetadataUtil.modId());
+        y += 24;
+
+        addInfoCard(centerX, y, "Platform", "Fabric Client Mod");
+        y += 30;
+
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal("§9🌐 Open GitHub Repository"),
+                btn -> {
+                    Util.getOperatingSystem().open("https://github.com/zpleum/zCMD");
+                }
+        ).dimensions(centerX - 110, y, 220, 20).build());
+    }
+
+    private void addInfoCard(int centerX, int y, String label, String value) {
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal("§7" + label + ": §f" + value),
+                btn -> {}
+        ).dimensions(centerX - 120, y, 240, 20).build());
     }
 
     private void setupEditOverlay(int centerX) {
@@ -185,30 +255,38 @@ public class ZCMDConfigScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        boolean shift = Screen.hasShiftDown();
-        deleteButtons.values().forEach(btn -> { btn.setMessage(Text.literal(shift ? "§c§l🗑" : "§8🗑")); btn.active = shift; });
 
         context.fillGradient(0, 0, width, height, 0xEE101010, 0xEE050505);
         context.fill(0, 0, width, 55, 0x66000000);
 
         super.render(context, mouseX, mouseY, delta);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 10, 0xFFFFFF);
 
-        if (currentTab == Tab.APPEARANCE) {
-            context.fill(width / 2 + 110, 65, width - 10, 160, 0x44FFFFFF);
-            context.drawCenteredTextWithShadow(textRenderer, "§7[ Live HUD Preview ]", width - (width - (width / 2 + 110)) / 2 - 10, 75, 0xFFFFFF);
-        }
+        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 10, 0xFFFFFF);
 
         if (editingEntry != null) {
             context.fill(0, 0, width, height, 0xCC000000);
-            context.drawCenteredTextWithShadow(textRenderer, "§6§l✎ EDITING MODE", width / 2, height / 2 - 30, 0xFFFFFF);
+            context.drawCenteredTextWithShadow(
+                    textRenderer,
+                    "§6§l✎ EDITING MODE",
+                    width / 2,
+                    height / 2 - 30,
+                    0xFFFFFF
+            );
+
             editCmdField.render(context, mouseX, mouseY, delta);
             editIntervalField.render(context, mouseX, mouseY, delta);
-            super.render(context, mouseX, mouseY, delta);
-        } else if (currentTab == Tab.COMMANDS) {
+        }
+
+        if (currentTab == Tab.COMMANDS && editingEntry == null) {
             addCmdField.render(context, mouseX, mouseY, delta);
             addIntervalField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(textRenderer, "§a§l+ Quick Add:", width / 2 - 100, addCmdField.getY() - 12, 0xFFFFFF);
+            context.drawTextWithShadow(
+                    textRenderer,
+                    "§a§l+ Quick Add:",
+                    width / 2 - 100,
+                    addCmdField.getY() - 12,
+                    0xFFFFFF
+            );
         }
     }
 }
