@@ -38,7 +38,7 @@ public class ZCMDHud {
         long currentTick = mc.world.getTime();
 
         List<Text> lines = new ArrayList<>();
-        lines.add(Text.literal("§8( §6§l⚡ §r§6zCMD §8) ").append(Text.literal(cfg.enabled ? "§aEnabled" : "§cDisabled")));
+        lines.add(Text.literal("§8( §6§l⚡ zCMD §8) ").append(Text.literal(cfg.enabled ? "§aEnabled" : "§cDisabled")));
 
         if (!cfg.enabled) {
             lines.add(Text.literal("§8• §7Paused"));
