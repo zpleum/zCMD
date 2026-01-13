@@ -20,7 +20,8 @@ public class ZcmdClient implements ClientModInitializer {
     private static KeyBinding toggleKey;
     private static KeyBinding openGuiKey;
 
-    // runtime queue only
+    private static Long lastWorldTime = null;
+
     private static final PriorityQueue<CommandEntry> queue =
             new PriorityQueue<>(Comparator.comparingLong(e -> e.nextRunTick));
 
@@ -62,7 +63,7 @@ public class ZcmdClient implements ClientModInitializer {
                 }
 
                 client.player.sendMessage(
-                        Text.literal("§8( §6§l⚡ §r§6zCMD §8) ")
+                        Text.literal("§8( §6§l⚡ zCMD §8) ")
                                 .append(Text.literal(CONFIG.enabled ? "§aEnabled" : "§cDisabled")),
                         false
                 );
@@ -70,18 +71,25 @@ public class ZcmdClient implements ClientModInitializer {
 
             if (!CONFIG.enabled) {
                 queue.clear();
+                lastWorldTime = null;
                 return;
             }
 
-            if (queue.isEmpty() && !CONFIG.commands.isEmpty()) {
-                rebuildQueue(client.world.getTime());
+            long currentTick = client.world.getTime();
+
+            if (lastWorldTime != null && currentTick < lastWorldTime) {
+                rebuildQueue(currentTick);
             }
 
-            long tick = client.world.getTime();
+            lastWorldTime = currentTick;
+
+            if (queue.isEmpty() && !CONFIG.commands.isEmpty()) {
+                rebuildQueue(currentTick);
+            }
 
             while (!queue.isEmpty()) {
                 CommandEntry entry = queue.peek();
-                if (entry.nextRunTick > tick) break;
+                if (entry.nextRunTick > currentTick) break;
 
                 queue.poll();
 
@@ -90,8 +98,8 @@ public class ZcmdClient implements ClientModInitializer {
                     client.player.networkHandler.sendChatCommand(cmd);
                 }
 
-                // reset schedule ใหม่ทุกครั้ง
-                entry.nextRunTick = tick + entry.intervalTicks();
+                // schedule ใหม่จาก tick ปัจจุบัน
+                entry.nextRunTick = currentTick + entry.intervalTicks();
                 queue.add(entry);
             }
         });
