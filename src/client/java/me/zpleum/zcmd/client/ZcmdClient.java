@@ -75,10 +75,17 @@ public class ZcmdClient implements ClientModInitializer {
                 return;
             }
 
-            long currentTick = client.world.getTime();
+            long rawTick = client.world.getTime();
+            long currentTick = rawTick;
 
             if (lastWorldTime != null && currentTick < lastWorldTime) {
-                rebuildQueue(currentTick);
+                long diff = lastWorldTime - currentTick;
+
+                if (diff <= 200) {
+                    currentTick = lastWorldTime;
+                } else {
+                    rebuildQueue(currentTick);
+                }
             }
 
             lastWorldTime = currentTick;
