@@ -1,4 +1,4 @@
-# ⚡ zAutoFeed
+# ⚡ zCMD
 
 **zAutoFeed** is a lightweight Fabric mod for Minecraft 1.21+ that automatically executes commands at configurable intervals.  
 Perfect for repetitive tasks like feeding, buffing, or running server-side commands.
@@ -30,7 +30,7 @@ Perfect for repetitive tasks like feeding, buffing, or running server-side comma
 
 | Action                   | Default Key |
 |---------------------------|------------|
-| Toggle AutoFeed           | `.` (period) |
+| Toggle zCMD               | `.` (period) |
 | Open Config GUI           | `O`          |
 
 ### GUI Features
@@ -49,7 +49,7 @@ Perfect for repetitive tasks like feeding, buffing, or running server-side comma
 
 ## Configuration
 
-- Configuration is stored in `zautofeed.json` inside the Minecraft `config` folder  
+- Configuration is stored in `zcmd.json` inside the Minecraft `config` folder  
 - Auto-saved when changing settings via GUI  
 - Example:
 
