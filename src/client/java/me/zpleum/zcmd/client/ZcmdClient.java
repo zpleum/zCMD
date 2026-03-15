@@ -33,14 +33,14 @@ public class ZcmdClient implements ClientModInitializer {
                 "key.zcmd.toggle",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_PERIOD,
-                "category.zcmd"
+                KeyBinding.Category.MISC
         ));
 
         openGuiKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.zcmd.open_gui",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
-                "category.zcmd"
+                KeyBinding.Category.MISC
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

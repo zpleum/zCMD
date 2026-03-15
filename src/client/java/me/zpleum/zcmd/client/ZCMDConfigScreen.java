@@ -3,11 +3,15 @@ package me.zpleum.zcmd.client;
 import me.zpleum.zcmd.config.CommandEntry;
 import me.zpleum.zcmd.config.ZCMDConfig.HudAlignment;
 import me.zpleum.zcmd.config.ZCMDConfig;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,26 +37,21 @@ public class ZCMDConfigScreen extends Screen {
         this.tempCommands = new ArrayList<>(config.commands);
     }
 
-    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 257) {
             if (addCmdField != null && addCmdField.isFocused()) {
                 addNewCommand();
                 return true;
             }
-            if (editingEntry != null && editCmdField.isFocused()) {
-                saveEdit();
-                return true;
-            }
         }
 
-        if (keyCode == 256 && editingEntry != null) {
+        if (keyCode == 256 && editingEntry != null) { // ESC
             editingEntry = null;
             init();
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(new net.minecraft.client.input.KeyInput(keyCode, scanCode, modifiers));
     }
 
     private void addNewCommand() {
@@ -110,12 +109,20 @@ public class ZCMDConfigScreen extends Screen {
 
     private void initCommandTab(int centerX) {
         int y = 60;
+        var window = MinecraftClient.getInstance().getWindow();
+
         for (CommandEntry entry : tempCommands) {
             addDrawableChild(ButtonWidget.builder(Text.literal("§f/" + entry.command + " §e" + entry.intervalSeconds + "s"),
                     btn -> { editingEntry = entry; init(); }).dimensions(centerX - 100, y, 175, 20).build());
+
             ButtonWidget delBtn = ButtonWidget.builder(Text.literal("🗑"), btn -> {
-                if (Screen.hasShiftDown()) { tempCommands.remove(entry); init(); }
+                if (InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) ||
+                        InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+                    tempCommands.remove(entry);
+                    init();
+                }
             }).dimensions(centerX + 80, y, 20, 20).build();
+
             deleteButtons.put(entry, delBtn);
             addDrawableChild(delBtn);
             y += 22;
@@ -185,7 +192,9 @@ public class ZCMDConfigScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        boolean shift = Screen.hasShiftDown();
+        boolean shift =
+                GLFW.glfwGetKey(client.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS ||
+                        GLFW.glfwGetKey(client.getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS;
         deleteButtons.values().forEach(btn -> { btn.setMessage(Text.literal(shift ? "§c§l🗑" : "§8🗑")); btn.active = shift; });
 
         context.fillGradient(0, 0, width, height, 0xEE101010, 0xEE050505);
